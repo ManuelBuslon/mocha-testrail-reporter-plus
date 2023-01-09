@@ -1,1 +1,2 @@
-module.exports = require("./dist/lib/mocha-testrail-reporter").MochaTestRailReporter
+module.exports =
+  require("./dist/mocha-testrail-reporter").MochaTestRailReporter;

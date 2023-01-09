@@ -1,35 +1,33 @@
-import request = require("unirest");
+const unirest = require("unirest");
 import { TestRailOptions, TestRailResult } from "./testrail.interface";
-
+import { getTestRailConfig, getAuthorization } from "./get-config";
+const branch = require("git-branch");
+const gitCommitInfo = require("git-commit-info");
 /**
  * TestRail basic API wrapper
  */
 export class TestRail {
   private base: String;
+  private testRailInfo;
+  private authorization;
+  private includeLastCommit;
 
   constructor(private options: TestRailOptions) {
-    // check if all required options are specified
-    ["username", "password", "domain", "projectId", "projectId"].forEach(
-      (option) => {
-        if (!options[option]) {
-          throw new Error(`Missing required option ${option}`);
-        }
-      }
-    );
-
-    // compute base url
-    this.base = `https://${options.domain}/index.php`;
+    this.testRailInfo = getTestRailConfig(process.env);
+    this.authorization = getAuthorization(this.testRailInfo);
+    this.base = `${this.testRailInfo.host}/index.php?/api/v2`;
+    this.includeLastCommit = options["includeLastCommit"] || false;
   }
 
   private _post(api: String, body: any, callback: Function, error?: Function) {
-    request("POST", this.base)
-      .query(`/api/v2/${api}`)
+    unirest
+      .post(`${this.base}/${api}`)
       .headers({
         "content-type": "application/json",
+        Authorization: this.authorization,
       })
       .type("json")
       .send(body)
-      .auth(this.options.username, this.options.password)
       .end((res) => {
         if (res.error) {
           console.log("Error: %s", JSON.stringify(res.body));
@@ -41,55 +39,6 @@ export class TestRail {
         }
         callback(res.body);
       });
-  }
-
-  private _get(api: String, callback: Function, error?: Function): void {
-    request("GET", this.base)
-      .query(`/api/v2/${api}`)
-      .headers({
-        "content-type": "application/json",
-      })
-      .type("json")
-      .auth(this.options.username, this.options.password)
-      .end((res) => {
-        if (res.error) {
-          console.log("Error: %s", JSON.stringify(res.body));
-          if (error) {
-            error(res.error);
-          } else {
-            throw new Error(res.error);
-          }
-        }
-        callback(res.body);
-      });
-  }
-
-  /**
-   * Fetchs test cases from projet/suite based on filtering criteria (optional)
-   * @param {{[p: string]: number[]}} filters
-   * @param {Function} callback
-   */
-  public fetchCases(
-    filters?: { [key: string]: number[] },
-    callback?: Function
-  ): void {
-    let filter = "";
-    if (filters) {
-      for (let key in filters) {
-        if (filters.hasOwnProperty(key)) {
-          filter += "&" + key + "=" + filters[key].join(",");
-        }
-      }
-    }
-
-    this._get(
-      `get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}${filter}`,
-      (body) => {
-        if (callback) {
-          callback(body.cases);
-        }
-      }
-    );
   }
 
   /**
@@ -100,22 +49,42 @@ export class TestRail {
    * @param {Function} callback
    */
   public publish(
-    name: string,
-    description: string,
+    caseIds: number[],
     results: TestRailResult[],
     callback?: Function
-  ): void {
+  ) {
     console.log(`Publishing ${results.length} test result(s) to ${this.base}`);
 
+    let executionDateTime = new Date().toISOString();
+    let lastCommit = "";
+    if (this.includeLastCommit) {
+      lastCommit = `${branch.sync()}-${gitCommitInfo().shortHash}`;
+    }
+    const name = `${
+      this.testRailInfo.runName || "Automation run"
+    }-${lastCommit} ${executionDateTime}`;
+    console.log(name);
+
+    let requestBody: {
+      suite_id: string;
+      name: string;
+      include_all: boolean;
+      assignedto_id?: string;
+      case_ids?: number[];
+    } = {
+      suite_id: this.testRailInfo.suiteId,
+      name: name,
+      include_all: true,
+    };
+    if (caseIds && caseIds.length > 0) {
+      const uniqueCaseIds = [...new Set(caseIds)];
+      requestBody.include_all = false;
+      requestBody.case_ids = uniqueCaseIds;
+    }
+
     this._post(
-      `add_run/${this.options.projectId}`,
-      {
-        suite_id: this.options.suiteId,
-        name: name,
-        description: description,
-        assignedto_id: this.options.assignedToId,
-        include_all: true,
-      },
+      `add_run/${this.testRailInfo.projectId}`,
+      requestBody,
       (body) => {
         const runId = body.id;
         console.log(`Results published to ${this.base}?/runs/view/${runId}`);

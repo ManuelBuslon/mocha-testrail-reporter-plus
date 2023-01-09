@@ -1,23 +1,21 @@
 export interface TestRailOptions {
-  domain: string;
-  username: string;
-  password: string;
-  projectId: string;
-  suiteId: string;
-  assignedToId?: string;
+  spec: string;
+  tags?: string;
+  excludeTags?: string;
+  includeLastCommit?: boolean;
 }
 
-export enum Status {
-  Passed = 1,
-  Blocked = 2,
-  Untested = 3,
-  Retest = 4,
-  Failed = 5,
-}
+export const Status = {
+  passed: 1,
+  pending: 2,
+  untested: 3,
+  retest: 4,
+  failed: 5,
+};
 
 export interface TestRailResult {
   case_id: number;
-  status_id: Status;
+  status_id: number;
   comment?: String;
 }
 
