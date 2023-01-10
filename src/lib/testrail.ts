@@ -51,6 +51,7 @@ export class TestRail {
   public publish(
     caseIds: number[],
     results: TestRailResult[],
+    addToName: string,
     callback?: Function
   ) {
     console.log(`Publishing ${results.length} test result(s) to ${this.base}`);
@@ -62,7 +63,7 @@ export class TestRail {
     }
     const name = `${
       this.testRailInfo.runName || "Automation run"
-    }-${lastCommit} ${executionDateTime}`;
+    } ${addToName}-${lastCommit} ${executionDateTime}`;
     console.log(name);
 
     let requestBody: {

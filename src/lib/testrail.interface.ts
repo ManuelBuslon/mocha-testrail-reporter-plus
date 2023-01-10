@@ -3,6 +3,7 @@ export interface TestRailOptions {
   tags?: string;
   excludeTags?: string;
   includeLastCommit?: boolean;
+  addToName?: string;
 }
 
 export const Status = {

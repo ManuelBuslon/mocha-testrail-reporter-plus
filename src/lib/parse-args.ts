@@ -5,10 +5,11 @@ export function parseArgs(argv: string[]) {
       "--tags": String,
       "--excludeTags": String,
       "--testrail": Boolean,
+      "--addToName": String,
     },
     { argv, permissive: true }
   );
-  ["--tags", "--excludeTags"].forEach((option) => {
+  ["--tags", "--excludeTags", "--addToName"].forEach((option) => {
     if (!args[option]) {
       args[option] = "";
     }

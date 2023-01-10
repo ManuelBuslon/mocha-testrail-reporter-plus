@@ -84,9 +84,18 @@ export function findCasesInSpec(
 
 export function findCases(specs, tagged, negativeTagged): number[] {
   const readSpec = fs.readFileSync;
+  let tags = tagged;
+  let excludeTags = negativeTagged;
+  if (tagged.length === 1 && tagged[0] === "") {
+    tags = [];
+  }
+  if (tagged.length === 1 && tagged[0] === "") {
+    excludeTags = [];
+  }
+
   // find case Ids in each spec and flatten into a single array
   const allCaseIds: number[] = specs
-    .map((spec) => findCasesInSpec(spec, readSpec, tagged, negativeTagged))
+    .map((spec) => findCasesInSpec(spec, readSpec, tags, excludeTags))
     .reduce((a, b) => a.concat(b), [])
     .filter((id) => !isNaN(id));
   const uniqueCaseIds = Array.from(new Set(allCaseIds)).sort();

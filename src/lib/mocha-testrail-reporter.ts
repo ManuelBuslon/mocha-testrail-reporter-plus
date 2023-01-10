@@ -11,6 +11,7 @@ import { Status, TestRailOptions, TestRailResult } from "./testrail.interface";
 export class MochaTestRailReporter extends reporters.Spec {
   private results: TestRailResult[] = [];
   private caseIdsRun: number[] = [];
+  private addToName = "";
 
   constructor(runner: any, options: any) {
     super(runner);
@@ -25,6 +26,7 @@ export class MochaTestRailReporter extends reporters.Spec {
         (reporterOptions["--tags"] || "").split(","),
         (reporterOptions["--excludeTags"] || "").split(",")
       );
+      this.addToName = reporterOptions["--addToName"];
     });
 
     runner.on("test end", (test) => {
@@ -58,18 +60,11 @@ export class MochaTestRailReporter extends reporters.Spec {
           "No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx"
         );
       }
-      new TestRail(reporterOptions).publish(this.caseIdsRun, this.results);
-    });
-  }
-
-  private static validate(options: TestRailOptions, name: string) {
-    if (options == null) {
-      throw new Error("Missing --reporter-options in mocha.opts");
-    }
-    if (options[name] == null) {
-      throw new Error(
-        `Missing ${name} value. Please update --reporter-options in mocha.opts`
+      new TestRail(reporterOptions).publish(
+        this.caseIdsRun,
+        this.results,
+        this.addToName
       );
-    }
+    });
   }
 }
