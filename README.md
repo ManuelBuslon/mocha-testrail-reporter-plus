@@ -34,6 +34,8 @@ module.exports = {
 };
 ```
 
+* It is necessary to include --testrail in order to report
+
 Mark your mocha test names with ID of Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
  
 ```Javascript
