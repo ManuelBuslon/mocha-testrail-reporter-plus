@@ -22,8 +22,8 @@ export class MochaTestRailReporter extends reporters.Spec {
       const specs = findSpecs(reporterOptions.spec);
       this.caseIdsRun = findCases(
         specs,
-        (reporterOptions.tags || "").split(","),
-        (reporterOptions.excludeTags || "").split(",")
+        (reporterOptions["--tags"] || "").split(","),
+        (reporterOptions["--excludeTags"] || "").split(",")
       );
     });
 

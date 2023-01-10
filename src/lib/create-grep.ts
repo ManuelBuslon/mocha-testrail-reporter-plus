@@ -3,13 +3,13 @@ export function createGrep(args = {}) {
   let notTagExp = "";
   let usingTags = false;
   let onlyNegative = false;
-  if (args["tags"]) {
-    const tagged = args["tags"].replaceAll(",", "|");
+  if (args["--tags"]) {
+    const tagged = args["--tags"].replaceAll(",", "|");
     tagExp = `.*?(${tagged})`;
     usingTags = true;
   }
-  if (args["excludeTags"]) {
-    const excludeTags = args["excludeTags"].replaceAll(",", "|");
+  if (args["--excludeTags"]) {
+    const excludeTags = args["--excludeTags"].replaceAll(",", "|");
     notTagExp = `(?!(.*(${excludeTags})))`;
     if (!usingTags) {
       onlyNegative = true;
