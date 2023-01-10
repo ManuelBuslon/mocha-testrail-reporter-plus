@@ -1,35 +1,38 @@
 #Testrail Reporter for Mocha
 
-[![npm version](https://badge.fury.io/js/mocha-testrail-reporter.svg)](https://badge.fury.io/js/mocha-testrail-reporter)
-
 Pushes test results into Testrail system.
-
-> **NOTE** : Version 2.0.x is backward compatible with v1 but has been updated to latest dependencies. The V2 choice is to ensure that existing users are not affected!
 
 ## Installation
 
 ```shell
-$ npm install mocha-testrail-reporter --save-dev
+$ npm i mocha-testrail-reporter-plus --save-dev
 ```
 
 ## Usage
 Ensure that your testrail installation API is enabled and generate your API keys. See http://docs.gurock.com/
 
-Run mocha with `mocha-testrail-reporter`:
+Run mocha with `mocha-testrail-reporter-plus`:
 
-```shell
-$ mocha test --reporter mocha-testrail-reporter --reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
+Configure the mocharc.cjs to look like this:
+
+```"use strict";
+
+const { createGrep, parseArgs } = require("mocha-testrail-reporter-plus/modules");
+const args = parseArgs(process.argv);
+const spec = "src/**/*.spec.ts";
+
+module.exports = {
+  extension: ["ts"],
+  loader: "ts-node/esm",
+  spec: spec,
+  timeout: 100000,
+  grep: createGrep(args),
+  ...(args["--testrail"] && {
+    reporter: "mocha-testrail-reporter-plus",
+    reporterOptions: { includeLastCommit: true, spec: spec, ...args },
+  }),
+};
 ```
-
-or use a mocha.options file
-```shell
-mocha --opts mocha-testrail.opts build/test
---recursive
---reporter mocha-testrail-reporter
---reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
---no-exit
-```
-
 
 Mark your mocha test names with ID of Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
  
@@ -40,47 +43,41 @@ it("Authenticate a valid user C321", () => {})
 
 Only passed or failed tests will be published. Skipped or pending tests will not be published resulting in a "Pending" status in testrail test run.
 
-## Options
+## Tags
 
-**domain**: *string* domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
+It is possible to use tags for positive or negative matching of tests with the --tags and --excludeTags parameters
 
-**username**: *string* user under which the test run will be created (e.g. jenkins or ci)
+### Examples
 
-**password**: *string* password or API token for user
+`it("C321 Authenticate a valid user -@ Smoke,Login", () => {})`
 
-**projectId**: *number* projet number with which the tests are associated
+    --tags Smoke,Development
 
-**suiteId**: *number* suite number with which the tests are associated
+    --excludeTags Production,Bug
 
-**assignedToId**: *number* (optional) user id which will be assigned failed tests
+For more information about tags refer to [Tags system](https://github.com/ManuelBuslon/find-test-names/tree/mocha-version)
 
-## Build and test locally
 
-### Setup testrail test server
+## Options in .env
 
-- Start a new TestRail trial from https://www.gurock.com/testrail/test-management/
-- Enable API under https://XXX.testrail.io/index.php?/admin/site_settings&tab=8
-- Add a new project (Use multiple test suites to manage cases)
-- Add a new test suite (ids: 1)
-- Add at least 4 test cases (ids: C1, C2, C3, C4, etc)
-- Once setup, set your environment variables - recommend using .env file in the root folder
-  - TESTRAIL_DOMAIN=XXX.testrail.io 
-  - TESTRAIL_USERNAME=XXX 
-  - TESTRAIL_PASSWORD=XXX 
-  - TESTRAIL_PROJECTID=1 
-  - TESTRAIL_SUITEID=1 
-  - TESTRAIL_ASSIGNEDTOID=1
-- Execute the build and test commands (unit and integration tests)
-- Execute the e2e test (requires build and .env file)
+**TESTRAIL_HOST**: *string* domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
 
-### Build and test
-```
-npm run clean
-npm run build
-npm run test
-```
+**TESTRAIL_USERNAME**: *string* user under which the test run will be created (e.g. jenkins or ci)
+
+**TESTRAIL_PASSWORD**: *string* password or API token for user
+
+**TESTRAIL_PROJECTID**: *number* projet number with which the tests are associated
+
+**TESTRAIL_SUITEID**: *number* suite number with which the tests are associated
+
+**TESTRAIL_RUNNAME**: *string* run name 
 
 ## References
 - http://mochajs.org/#mochaopts
 - https://github.com/mochajs/mocha/wiki/Third-party-reporters
 - http://docs.gurock.com/testrail-api2/start
+
+
+## Acknowledgments
+
+Pierre Awaragi, owner of the mocha-testrail-reporter.

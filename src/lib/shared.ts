@@ -23,7 +23,7 @@ export function findReporterOptions(options) {
   if (options.reporterOptions) {
     return options.reporterOptions;
   }
-  // this is require to handle .mocharc.js files
+  // this is require to handle .mocharc.cjs files
   return Object.keys(options)
     .filter(function (key) {
       return key.indexOf("reporterOptions.") === 0;

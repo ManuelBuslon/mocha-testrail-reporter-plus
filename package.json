@@ -1,6 +1,6 @@
 {
   "name": "mocha-testrail-reporter-plus",
-  "version": "2.0.5",
+  "version": "1.0.1",
   "description": "A Testrail reporter for mocha utilising TestRail API",
   "main": "index.js",
   "private": false,
@@ -12,24 +12,20 @@
   "files": [
     "node_modules",
     "dist",
-    "bin",
     "modules.js"
   ],
   "author": {
-    "name": "Pierre Awaragi",
-    "email": "pierre@awaragi.com"
+    "name": "Manuel Buslon",
+    "email": "manuelbuslon22@gmail.com"
   },
   "license": "MIT",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+    "url": "https://github.com/ManuelBuslon/mocha-testrail-reporter-plus.git"
   },
   "bugs": {
-    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
-  },
-  "bin": {
-    "create-tags": "dist/create-tags.js"
+    "url": "https://github.com/ManuelBuslon/mocha-testrail-reporter-plus/issues"
   },
   "scripts": {
     "build": "tsc",
